@@ -1,17 +1,13 @@
 import React from 'react'
+import Spinner from './Spinner'
 
 export default function Controls ({
   chunker,
   onChunkerChange,
-  rawLeaves,
-  onRawLeavesChange,
-  strategy,
-  onStrategyChange,
-  maxChildren,
-  onMaxChildrenChange,
-  layerRepeat,
-  onLayerRepeatChange,
-  onReset
+  onReset,
+  onGc,
+  onUnpinAll,
+  loading
 }) {
   return (
     <div className='flex flex-row items-center pa3 bg-white'>
@@ -27,55 +23,28 @@ export default function Controls ({
           <option value='size-262144'>26,2144 byte chunks</option>
         </select>
       </div>
-      <div className='mr3'>
-        <select
-          value={rawLeaves}
-          onChange={e => onRawLeavesChange(e.target.value === 'true')}
-          className='charcoal ba b--black-20 br1 pv1 ph2 db center focus-outline'>
-          <option value='false'>UnixFS leaves</option>
-          <option value='true'>Raw leaves</option>
-        </select>
+      <div className='flex-auto'>
+        <Spinner show={loading} />
       </div>
-      <div className='mr3'>
-        <select
-          value={strategy}
-          onChange={e => onStrategyChange(e.target.value)}
-          className='charcoal ba b--black-20 br1 pv1 ph2 db center focus-outline'>
-          <option value='balanced'>Balanced DAG</option>
-          <option value='trickle'>Trickle DAG</option>
-          <option value='flat'>Flat DAG</option>
-        </select>
-      </div>
-      {['balanced', 'trickle'].includes(strategy) ? (
-        <div className='mr3'>
-          <select
-            value={maxChildren}
-            onChange={e => onMaxChildrenChange(parseInt(e.target.value))}
-            className='charcoal ba b--black-20 br1 pv1 ph2 db center focus-outline'>
-            <option value='11'>11 children max</option>
-            <option value='44'>44 children max</option>
-            <option value='174'>174 children max</option>
-          </select>
-        </div>
-      ) : null}
-      {strategy === 'trickle' ? (
-        <div className='mr3'>
-          <select
-            value={layerRepeat}
-            onChange={e => onLayerRepeatChange(parseInt(e.target.value))}
-            className='charcoal ba b--black-20 br1 pv1 ph2 db center focus-outline'>
-            <option value='1'>1 layer repeat</option>
-            <option value='4'>4 layer repeats</option>
-            <option value='16'>16 layer repeats</option>
-          </select>
-        </div>
-      ) : null}
-      <div className='flex-auto' />
+      <button
+        type='button'
+        onClick={e => onUnpinAll()}
+        className='mr2 transition-all sans-serif dib v-mid fw5 nowrap lh-copy bn br1 ph4 pv1 pointer focus-outline bg-aqua-muted hover-bg-aqua white'
+        title='Unpin all pinned blocks'>
+        Unpin all
+      </button>
+      <button
+        type='button'
+        onClick={e => onGc()}
+        className='mr2 transition-all sans-serif dib v-mid fw5 nowrap lh-copy bn br1 ph4 pv1 pointer focus-outline bg-yellow-muted hover-bg-yellow white'
+        title='Simulate GC by deleting unpinned blocks'>
+        Run GC
+      </button>
       <button
         type='button'
         onClick={e => onReset()}
-        className='transition-all sans-serif dib v-mid fw5 nowrap lh-copy bn br1 ph4 pv1 pointer focus-outline bg-gray hover-bg-red white'
-        title='Clear file(s) and reset controls to defaults'>
+        className='transition-all sans-serif dib v-mid fw5 nowrap lh-copy bn br1 ph4 pv1 pointer focus-outline bg-red-muted hover-bg-red white'
+        title='Delete the repo and re-initialise IPFS'>
         Reset
       </button>
     </div>

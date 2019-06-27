@@ -10,7 +10,7 @@ export default function DropTarget ({ onFileDrop, children, ...props }) {
   const onDrop = e => {
     e.stopPropagation()
     e.preventDefault()
-    onFileDrop(e.dataTransfer.files[0])
+    onFileDrop(Array.from(e.dataTransfer.files))
   }
 
   return (

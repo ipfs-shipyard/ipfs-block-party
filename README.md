@@ -1,5 +1,7 @@
-# ipfs-dag-builder-vis
+# IPFS block party
 
-> See how the DAGs get built
+> See the blocks in a block store
 
-<img width="1320" alt="screenshot" src="https://user-images.githubusercontent.com/152863/57775953-28dbf380-7716-11e9-8b43-3f42b73ccc4c.png">
+Drop a file to see it turn into blocks in your local blockstore. Unpin all your blocks, and see them all get deleted when you trigger garbage collection.
+
+![screenshot](./docs/screenshot.png)

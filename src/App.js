@@ -2,83 +2,119 @@
 import React, { useState, useEffect } from 'react'
 import Header from './Header'
 import Controls from './Controls'
-import Dag from './Dag'
-import { ipfsAdd } from './lib/ipfs'
+import Blocks from './Blocks'
+import { getIpfs, ipfsAdd, ipfsGet, resetRepo, removeUnpinned, unpinAll, getBlockInfo } from './lib/ipfs'
 import DropTarget from './DropTarget'
 import NodeInfo from './NodeInfo'
-import Spinner from './Spinner'
 
 export default function App () {
   const [files, setFiles] = useState([])
-  const [chunker, setChunker] = useState('size-512')
-  const [rawLeaves, setRawLeaves] = useState(false)
-  const [strategy, setStrategy] = useState('balanced')
-  const [maxChildren, setMaxChildren] = useState(11)
-  const [layerRepeat, setLayerRepeat] = useState(4)
+  const [chunker, setChunker] = useState('size-1024')
   const [rootCid, setRootCid] = useState(null)
   const [focusedNode, setFocusedNode] = useState(null)
+  const [blockInfo, setBlockInfo] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [cidToGet, setCidToGet] = useState('')
 
   useEffect(() => {
     if (!files.length) return
     const addFiles = async () => {
       setRootCid(null)
       setLoading(true)
-      const cid = await ipfsAdd({ files, chunker, rawLeaves, strategy, maxChildren, layerRepeat })
+      const cid = await ipfsAdd({ files, chunker })
+      setLoading(false)
       setRootCid(cid)
     }
     addFiles()
-  }, [files, chunker, rawLeaves, strategy, maxChildren, layerRepeat])
+  }, [files, chunker])
 
-  const onFileChange = file => {
-    setFiles(files.concat({ path: file.name, content: file }))
+  // update block info when focusedNode changes
+  useEffect(() => {
+    console.log('update block info effect')
+    if (!focusedNode) return
+    const fn = async () => {
+      const res = await getBlockInfo(focusedNode)
+      console.log('updating info for focusedNode', focusedNode, res.id)
+      if (focusedNode === res.id) {
+        setBlockInfo(res)
+      }
+    }
+    fn()
+  }, [focusedNode])
+
+  const onFilesChange = files => {
+    setFiles(files.map(file => ({ path: file.name, content: file })))
   }
 
-  const onReset = () => {
+  const onCidSubmit = async e => {
+    setRootCid(null)
+    setLoading(true)
+    await ipfsGet(cidToGet)
+    setRootCid(cidToGet)
+  }
+
+  const onReset = async () => {
+    setLoading(true)
     setFiles([])
-    setChunker('size-512')
-    setStrategy('balanced')
-    setMaxChildren(11)
-    setLayerRepeat(4)
+    setChunker('size-1024')
     setRootCid(null)
     setFocusedNode(null)
+    await resetRepo()
+    await getIpfs()
+    setLoading(false)
+    console.log('reset complete')
+  }
+
+  const onUnpinAll = async () => {
+    setLoading(true)
+    await unpinAll()
+    setLoading(false)
+  }
+
+  const onRemoveUnpinned = async () => {
+    console.log('remove unpinned')
+    setLoading(true)
+    await removeUnpinned()
+    setLoading(false)
+    console.log('remove unpinned done')
   }
 
   return (
     <div className='avenir flex flex-column h-100'>
       <div className='flex-none'>
-        <Header />
+        <Header>
+          <div className='dn'>
+            <form onSubmit={onCidSubmit} className='flex items-center'>
+              <input type='text' value={cidToGet} className='mh3 br2 ba b--silver pa2 f5 dib w5' placeholder='QmHash' />
+              <button
+                type='submit'
+                className='mr2 transition-all sans-serif dib v-mid fw5 nowrap lh-copy bn br1 ph4 pv1 pointer focus-outline bg-green-muted hover-bg-green white'
+                title='ipfs.get a CID'>
+                Get
+              </button>
+            </form>
+          </div>
+        </Header>
       </div>
       <div className='flex-none'>
         <Controls
           chunker={chunker}
           onChunkerChange={setChunker}
-          rawLeaves={rawLeaves}
-          onRawLeavesChange={setRawLeaves}
-          strategy={strategy}
-          onStrategyChange={setStrategy}
-          maxChildren={maxChildren}
-          onMaxChildrenChange={setMaxChildren}
-          layerRepeat={layerRepeat}
-          onLayerRepeatChange={setLayerRepeat}
-          onReset={onReset} />
+          onReset={onReset}
+          onGc={onRemoveUnpinned}
+          onUnpinAll={onUnpinAll}
+          loading={loading} />
       </div>
       <div className='flex-auto'>
-        <DropTarget onFileDrop={onFileChange} className='h-100'>
-          {files.length ? (
-            <div className='flex flex-column h-100'>
-              <div className='flex-auto relative'>
-                <Spinner show={loading} />
-                <Dag
-                  rootCid={rootCid}
-                  onNodeFocus={setFocusedNode}
-                  onGraphRender={() => setLoading(false)} />
-              </div>
-              <div className='flex-none'>
-                <NodeInfo info={focusedNode} />
-              </div>
+        <DropTarget onFileDrop={onFilesChange} className='h-100'>
+          <div className='flex flex-column h-100'>
+            <div className='flex-auto relative'>
+              <Blocks onNodeFocus={setFocusedNode} />
             </div>
-          ) : null}
+            <div className='flex-none'>
+              <NodeInfo info={blockInfo} />
+            </div>
+          </div>
         </DropTarget>
       </div>
     </div>

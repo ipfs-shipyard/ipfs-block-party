@@ -20,7 +20,7 @@
 .lolo::after {
   content:'';
   display:block;
-  background: #0b3a53;
+  background: #69c4cd;
   width: 70px;
   height: 100%;
   animation: lolo 1.5s cubic-bezier(0.25,0.1,0.25,1) infinite;

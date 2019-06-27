@@ -1,18 +1,17 @@
 import React, { Component, createRef } from 'react'
+import PropTypes from 'prop-types'
 import cytoscape from 'cytoscape'
-import dagre from 'cytoscape-dagre'
 import UnixFs from 'ipfs-unixfs'
 import { DAGNode } from 'ipld-dag-pb'
 import { Buffer } from 'ipfs'
-import { getIpfs } from './lib/ipfs'
+import { getIpfs, getLocalBlockData } from './lib/ipfs'
 import DagGraphOptions from './DagGraphOptions'
 
-cytoscape.use(dagre)
-
-export default class Dag extends Component {
+export default class Blocks extends Component {
   constructor () {
     super()
     this._graphRoot = createRef()
+    this.cy = null
   }
 
   componentDidMount () {
@@ -20,42 +19,40 @@ export default class Dag extends Component {
   }
 
   componentDidUpdate (prevProps) {
-    if (prevProps.rootCid !== this.props.rootCid) {
-      this._updateGraph()
-    }
+    this._updateGraph()
   }
 
   async _updateGraph () {
-    if (this._graph) this._graph.destroy()
-    if (this.props.onNodeFocus) this.props.onNodeFocus(null)
-
-    const { rootCid } = this.props
-    if (!rootCid) return
-
-    const nodeMap = await this._getGraphNodes(rootCid)
-
-    // ...could have taken a while, did we get a new root node?
-    if (rootCid !== this.props.rootCid) return
-
-    const container = this._graphRoot.current
-    const elements = Array.from(nodeMap.values())
-
-    const cy = window.cy = this._graph = cytoscape({ elements, container, ...DagGraphOptions })
+    console.log('update graph')
+    if (!this._cy) {
+      const container = this._graphRoot.current
+      window.cy = this._cy = cytoscape({ container, ...DagGraphOptions })
+    }
+    const cy = this._cy
+    const blocks = await getLocalBlockData()
+    cy.elements().remove()
+    cy.add(blocks)
+    cy.layout(DagGraphOptions.layout).run()
 
     const focusElement = node => {
       cy.nodes('.focused').removeClass('focused')
       node.addClass('focused')
-      this.props.onNodeFocus(node.data())
+      if (this.props.onNodeFocus) {
+        this.props.onNodeFocus(node.id())
+      }
     }
 
-    cy.on('tapdragover', e => {
+    if (blocks && blocks[0]) {
+      console.log('focus', blocks[0])
+      focusElement(cy.getElementById(cy.nodes().first()))
+    }
+
+    cy.on('tap', e => {
+      if (!e.target.id && !e.target.group) return
       if (!this.props.onNodeFocus || e.target.group() !== 'nodes') return
       focusElement(e.target)
     })
 
-    cy.layout(DagGraphOptions.layout).run()
-
-    if (this.props.onNodeFocus) focusElement(cy.getElementById(rootCid))
     if (this.props.onGraphRender) this.props.onGraphRender()
   }
 
@@ -116,4 +113,9 @@ export default class Dag extends Component {
   render () {
     return <div ref={this._graphRoot} className='bg-snow-muted h-100' />
   }
+}
+
+Blocks.propTypes = {
+  numObjects: PropTypes.number,
+  pins: PropTypes.array
 }

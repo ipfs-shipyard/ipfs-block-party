@@ -22,7 +22,7 @@ jobs:
     docker:
       - image: olizilla/ipfs-dns-deploy:latest
         environment:
-          DOMAIN: dag.ipfs.io
+          DOMAIN: blocks.ipfs.io
           BUILD_DIR: dist
     steps:
       - attach_workspace:

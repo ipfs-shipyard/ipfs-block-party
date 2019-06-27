@@ -1,25 +1,47 @@
+const nodeSize = '30px'
+
 export default {
+  autoungrabify: true,
   layout: {
-    name: 'dagre',
-    rankSep: 80,
-    nodeSep: 1
+    name: 'grid',
+    condense: true,
+    fit: true,
+    padding: 10
   },
   style: [
     {
       selector: 'node',
       style: {
-        shape: 'ellipse',
-        width: '14px',
-        height: '14px',
-        'background-color': '#244e66'
+        shape: 'square',
+        width: nodeSize,
+        height: nodeSize,
+        'background-color': '#28CA9F'
+      }
+    },
+    {
+      selector: '.unpinned',
+      style: {
+        shape: 'square',
+        width: nodeSize,
+        height: nodeSize,
+        'background-color': '#b7bbc8'
+      }
+    },
+    {
+      selector: '[type = "recursive"]',
+      style: {
+        shape: 'square',
+        width: nodeSize,
+        height: nodeSize,
+        'background-color': '#ea5037'
       }
     },
     {
       selector: '.leaf',
       style: {
         shape: 'square',
-        width: '14px',
-        height: '14px',
+        width: nodeSize,
+        height: nodeSize,
         'background-color': '#28CA9F'
       }
     },
@@ -27,8 +49,8 @@ export default {
       selector: '.raw',
       style: {
         shape: 'square',
-        width: '14px',
-        height: '14px',
+        width: nodeSize,
+        height: nodeSize,
         'background-color': '#ea5037'
       }
     },
@@ -50,29 +72,18 @@ export default {
       selector: '.unixfs.raw',
       style: {
         shape: 'square',
-        width: '14px',
-        height: '14px',
+        width: nodeSize,
+        height: nodeSize,
         'background-color': '#f39021'
       }
     },
     {
       selector: 'edge',
       style: {
-        'source-distance-from-node': 3,
-        'target-distance-from-node': 4,
-        'curve-style': 'bezier',
-        'control-point-weight': 0.5,
         'width': 1,
-        'line-color': '#979797',
-        'line-style': 'dotted',
-        // 'target-label': 'data(index)',
-        'font-family': 'Consolas, monaco, monospace',
-        'font-size': '8px',
-        'target-text-margin-x': '-5px',
-        'color': '#ccc',
-        'target-text-margin-y': '-2px',
-        'text-halign': 'center',
-        'text-valign': 'bottom'
+        'opacity': 0,
+        'line-color': 'rgb(151,151,151)',
+        'line-style': 'dotted'
       }
     },
     {

@@ -6,14 +6,15 @@ const NodeContainer = ({ children }) => (
 
 const CidColumn = ({ cid }) => (
   <Fragment>
-    <span className='f6 charcoal-muted'>CID</span><br />
-    <a
-      className='code charcoal hover-blue no-underline'
+    <div className='f6 charcoal-muted'>CID</div>
+    <span
+      style={{ userSelect: 'all' }}
+      className='code charcoal no-underline'
       href={`https://cid.ipfs.io/#${cid}`}
       target={cid}
       title='Inspect this CID'>
       {cid}
-    </a><br />&nbsp;
+    </span>
   </Fragment>
 )
 
@@ -240,6 +241,7 @@ const UnknownNode = ({ info }) => {
 }
 
 export default function NodeInfo ({ info }) {
+  console.log('NodeInfo', info)
   if (!info) return <NodeContainer />
 
   let Node
