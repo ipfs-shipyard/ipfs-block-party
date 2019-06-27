@@ -43,7 +43,7 @@ export default function Controls ({
       <button
         type='button'
         onClick={e => onReset()}
-        className='transition-all sans-serif dib v-mid fw5 nowrap lh-copy bn br1 ph4 pv1 pointer focus-outline bg-red-muted hover-bg-red white'
+        className='dn transition-all sans-serif v-mid fw5 nowrap lh-copy bn br1 ph4 pv1 pointer focus-outline bg-red-muted hover-bg-red white'
         title='Delete the repo and re-initialise IPFS'>
         Reset
       </button>
